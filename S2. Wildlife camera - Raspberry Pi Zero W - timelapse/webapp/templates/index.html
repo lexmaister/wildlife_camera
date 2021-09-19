@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+   <head>
+        <title>{{ title }}</title>
+        <link rel="stylesheet" href='../static/style.css'/>
+   </head>
+
+   <body>
+        <h4>PiZeroW Camera, current date and time: {{ time }}</h4>
+        <h4>State: {{ state }}</h4>
+        
+        <form method="post" action="/">
+
+            <label for="awb"> Auto white balance: </label>
+            <select id="awb" name="awb">
+                {% for awb_item in awb_list: %}
+                    <option value={{ awb_item }} {% if awb_sel==awb_item %} selected {% endif %} >{{ awb_item }}</option>        
+	            {% endfor %}
+            </select> 
+
+            <input type="submit" name="submit_button" value="SNAPSHOT">
+
+            <div class="timelapse">
+
+                <label for="days"> Days (0 - 10): </label>
+                <input type="number" id="days" name="days" min="0" max="10" value="0">
+
+                <label for="hours"> Hours (0 - 24): </label>
+                <input type="number" id="hours" name="hours" min="0" max="24" value="0">
+
+                <label for="minutes"> Minutes (0 - 60): </label>
+                <input type="number" id="minutes" name="minutes" min="0" max="60" value="10">
+
+                <label for="period"> Period (s): </label>
+                <input type="number" id="period" name="period" min="0" max="36000" value="10"> 
+
+                <input type="submit" name="submit_button" value="RUN TIMELAPSE">
+
+            </div>
+    
+        </form>
+        
+        <img src="{{ user_image }}" />
+   </body>
+</html>
