@@ -87,9 +87,11 @@ def index():
 
 @app.after_request
 def add_header(response):
-    # response.cache_control.no_store = True
     if 'Cache-Control' not in response.headers:
-        response.headers['Cache-Control'] = 'no-store'
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers['Cache-Control'] = 'public, max-age=0'
     return response
 
 if __name__ == "__main__":
