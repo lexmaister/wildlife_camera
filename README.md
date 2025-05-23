@@ -140,7 +140,7 @@ On Android with `VLC`:
 [Comprehensive guide](https://learn.adafruit.com/pir-passive-infrared-proximity-motion-sensor/overview) to PIR sensor work principles, design and usage. Sensor settings for this project:
 * the jumper is in the `H position`,
 * `time` is minimal,
-* `sensetivity` is maximal.
+* `sensetivity` is medium.
 
 **Connect to Zero Pi**
 
@@ -162,10 +162,10 @@ sudo apt install python3-picamera2 --no-install-recommends
 sudo apt install git
 ```
 
-Create a dir to keep project's files, move to it and clone project:
+Clone project from GitHub:
 ```sh
-mkdir rwc
-cd rwc
+git clone git clone https://github.com/lexmaister/wildlife_camera.git
+cd wildlife_camera/scripts/ 
 ```
 
 Then make the scripts executable:
@@ -185,4 +185,19 @@ If it works, script should print `Motion detected!` and then close.
 Run script to start video streaming, connect to the camera with `vlc` and point it:
 ```sh
 ./lv_stream.sh
+```
+
+After aiming, run capturing with command (options are available):
+```sh
+./rwc_start.py
+
+usage: rwc_start.py [-h] [-m MODE] [-d N]
+
+Capture wonderful moments of life in the wild nature with Raspberry Pi
+Wildlife Camera
+
+options:
+  -h, --help            show this help message and exit
+  -m MODE, --mode MODE  Capture mode [snapshot, clip], default: clip
+  -d N, --duration N    Clip duration in seconds, default: 10
 ```

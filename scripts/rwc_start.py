@@ -2,30 +2,18 @@
 """
 The script to provide Raspberry Wildlife Camera functionality
 """
-
+print('Starting Raspberry Pi Wildlife Camera...')
 import os
 from time import sleep
 from datetime import datetime as dt
 import argparse
 from gpiozero import MotionSensor
 from picamera2 import Picamera2
+from picamera2.encoders import H264Encoder, Quality, MJPEGEncoder
 
 
 SNAPSHOT = 'snapshot'
 CLIP = 'clip'
-
-
-
-
-
-# def clip():
-#     '''Take video clip and save to current session path'''
-#     print('---> Start taking clip...')
-#     video_config = picam2.create_video_configuration()
-#     fn = f"vid_{dt.now()}.jpg"
-#     picam2.capture_file(os.path.join(session_path, fn))
-#     print(f'---> Shapshot is saved: {fn!r}')
-
 
 
 class RWC:
@@ -65,11 +53,11 @@ class RWC:
         Returns:
             * path to directory including './img/' base path
         '''
-        if not os.path.exists('img'):
-            os.mkdir('img')
+        if not os.path.exists('../img'):
+            os.mkdir('../img')
 
         dt_start = dt.now().strftime('%Y-%m-%d_%H.%M.%S')
-        session_dir = f'img/{dt_start}'
+        session_dir = f'../img/{dt_start}'
         if not os.path.exists(session_dir):
             os.mkdir(session_dir)
 
@@ -89,18 +77,21 @@ class RWC:
 
     def snapshot(self):
         '''Take a snapshot and save to current session directory'''
-        print('---> Start taking snapshot...')
+        print('---> Taking snapshot...')
         fn = f"img_{dt.now()}.jpg"
         self.cam.capture_file(os.path.join(self.session_dir, fn))
         print(f'---> Shapshot is saved: {fn!r}')
 
-    def clip(self, bitrate=10000000):
+    def clip(self):
         '''Take a clip and save to current session directory'''
-        print('---> Start taking vlip...')
+        print(f'---> Taking clip {self.clip_dur} s...')
         fn = f"img_{dt.now()}.h264"
-        encoder = H264Encoder(bitrate)
-        self.cam.start_recording(encoder, os.path.join(self.session_dir, fn))
-        sleep(self.clip_dur)
+        self.cam.start_recording(
+            H264Encoder(), 
+            os.path.join(self.session_dir, fn),
+            quality=Quality.VERY_HIGH
+            )
+        sleep(self.clip_dur + 2) # added init time
         self.cam.stop_recording()
         print(f'---> Clip is saved: {fn!r}')
     
