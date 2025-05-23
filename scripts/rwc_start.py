@@ -9,7 +9,7 @@ from datetime import datetime as dt
 import argparse
 from gpiozero import MotionSensor
 from picamera2 import Picamera2
-from picamera2.encoders import H264Encoder, Quality, MJPEGEncoder
+from picamera2.encoders import H264Encoder, Quality
 
 
 SNAPSHOT = 'snapshot'
@@ -33,7 +33,9 @@ class RWC:
         if mode == SNAPSHOT:
             config = self.cam.create_still_configuration({"size": (2592,1944)})
         elif mode == CLIP:
-            config = self.cam.create_video_configuration({"size": (1920,1080)})
+            main = {'size': (1920, 1080), 'format': 'YUV420'}
+            controls = {'FrameRate': 30}
+            config = self.cam.create_video_configuration(main, controls=controls)
 
         self.cam.configure(config)
         self.cam.start(show_preview=False)
@@ -51,13 +53,15 @@ class RWC:
         '''Create a directory to save grabbed images / clips
         
         Returns:
-            * path to directory including './img/' base path
+            * absolute path to session directory
         '''
-        if not os.path.exists('../img'):
-            os.mkdir('../img')
+        script_dir = os.path.dirname(__file__)
+        img_dir = os.path.join(script_dir, '../img')
+        if not os.path.exists(img_dir):
+            os.mkdir(img_dir)
 
         dt_start = dt.now().strftime('%Y-%m-%d_%H.%M.%S')
-        session_dir = f'../img/{dt_start}'
+        session_dir = os.path.join(img_dir, dt_start)
         if not os.path.exists(session_dir):
             os.mkdir(session_dir)
 
@@ -91,7 +95,7 @@ class RWC:
             os.path.join(self.session_dir, fn),
             quality=Quality.VERY_HIGH
             )
-        sleep(self.clip_dur + 2) # added init time
+        sleep(self.clip_dur + 1) # added 1s for init
         self.cam.stop_recording()
         print(f'---> Clip is saved: {fn!r}')
     
