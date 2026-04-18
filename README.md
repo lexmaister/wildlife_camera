@@ -7,12 +7,14 @@ Wildlife camera project based on Raspberry Pi Zero W with 5Mp Camera and PIR mot
 ### Flasing RPi OS
 
 The most straight way to prepare SD-card is ising `rpi-imager`. It can be installed with:
+
 ```sh
 sudo apt install rpi-imager
 ```
 
 Due to Zero Pi will used with battery power source and without display, it is more efficient to use Raspberry Pi OS Lite:
-* Text-only operating system. 
+
+* Text-only operating system.
 * No graphical desktop, fewer background processes.
 * Consumes less power, boots faster, less load on CPU and RAM.
 
@@ -29,12 +31,14 @@ Using `rpi-imager` allows to initially set up our system to use `ssh` and put cr
 After flashing, insert your SD card to Zero Pi and wait for about 1 minute while it's booting. You also can check router info to wait until Zero Pi connects to it.
 
 Then it should be accessible to connect to with ssh:
+
 ```sh
 ssh pi@zeropi.local
 ```
 
 Then you can setup USB-gadget mode to connect with terminal.
 In Zero Pi console:
+
 ```sh
 echo "dtoverlay=dwc2" | sudo tee -a /boot/firmware/config.txt 
 echo " modules-load=dwc2,g_serial" | sudo tee -a /boot/firmware/cmdline.txt
@@ -43,12 +47,14 @@ sudo reboot
 ```
 
 After reboot - check if serial device is available
+
 ```sh
 ls /dev/ttyGS0
 sudo systemctl is-active getty@ttyGS0.service
 ```
 
 Now you can connect to Zero Pi via USB cable (plug it into `USB` connector on board) with terminal utility such as `picocom`:
+
 ```sh
 # check which serial device is used on your machine
 sudo dmesg | grep tty
@@ -59,18 +65,21 @@ picocom /dev/ttyACM0 -b 115200
 ### Setup and check camera
 
 For using as wildlife camera it is nessesary to turn of the camera led (in Zero Pi console):
+
 ```sh
 echo "disable_camera_led=1" | sudo tee -a /boot/firmware/config.txt 
 ```
 
 Then check if camera can grab images on full resolution with [built-in camera software](https://www.raspberrypi.com/documentation/computers/camera_software.html)
+
 ```sh
 # available cameras
 rpicam-still --list-cameras
 ```
 
 output should be like:
-```
+
+```sh
 Available cameras
 -----------------
 0 : ov5647 [2592x1944 10-bit GBRG] (/base/soc/i2c0mux/i2c@1/ov5647@36)
@@ -81,6 +90,7 @@ Available cameras
 ```
 
 Get full resolution test image:
+
 ```sh
 rpicam-still -n --width 2592 -o test.jpg
 ```
@@ -94,11 +104,13 @@ sudo apt install vlc-bin ffmpeg
 ``` -->
 
 Next test - 5 seconds video clip with FullHD resolution:
+
 ```sh
 rpicam-vid -n -t 5s --width 1980 --height 1080 -o test.h264
 ```
 
 Copy this files to your PC and check if they were recorded properly. To watch `.h264` video you can use:
+
 ```sh
 ffplay test.h264
 ```
@@ -110,11 +122,13 @@ ffplay test.h264
 ### Uncapsulated H264
 
 Zero Pi as server:
+
 ```sh
 rpicam-vid -t 0 -n --inline --listen -o tcp://0.0.0.0:8888
 ```
 
 On client side - to view video:
+
 ```sh
 ffplay tcp://zeropi.local:8888 -vf "setpts=N/((25)*TB)" -fflags nobuffer -flags low_delay -framedrop
 ```
@@ -122,33 +136,38 @@ ffplay tcp://zeropi.local:8888 -vf "setpts=N/((25)*TB)" -fflags nobuffer -flags 
 ### MPEG
 
 Run server:
+
 ```sh
 rpicam-vid -t 0 -n --codec mjpeg --listen -o tcp://0.0.0.0:8888
 ```
 
 On client side - PC `VLC`:
+
 ```sh
 vlc tcp/mjpeg://<ZEROPI_IP_ADDRESS>:8888
 ```
 
-On Android with `VLC`: 
+On Android with `VLC`:
+
 * Open `VLC`
 * Add new stream: `tcp://<ZEROPI_IP_ADDRESS>:8888`
 
 ## PIR sensor
 
 [Comprehensive guide](https://learn.adafruit.com/pir-passive-infrared-proximity-motion-sensor/overview) to PIR sensor work principles, design and usage. Sensor settings for this project:
+
 * the jumper is in the `H position`,
 * `time` is minimal,
 * `sensetivity` is medium.
 
-**Connect to Zero Pi**
+### Connect to Zero Pi
 
 To connect PIR sensor to Zero Pi we'll use the `J8` connector:
 
 ![j8header-zero](./docs/img/j8header-zero.png)
 
 Sensor should be connected to the following pins:
+
 * 1 - `3.3 VDC`
 * 9 - `Ground`
 * 11 - `GPIO 17` - sensor's `Out` signal
@@ -156,6 +175,7 @@ Sensor should be connected to the following pins:
 ## System setup
 
 Install libraries and git:
+
 ```sh
 sudo apt update
 sudo apt install python3-picamera2 --no-install-recommends
@@ -163,17 +183,20 @@ sudo apt install git
 ```
 
 Clone project from GitHub:
+
 ```sh
 git clone git clone https://github.com/lexmaister/wildlife_camera.git
 cd wildlife_camera/scripts/ 
 ```
 
 Then make the scripts executable:
+
 ```sh
 chmod +x *.sh *.py
 ```
 
 Now you can check if PIR-sensor is working - run script and move a palm ahead of it:
+
 ```sh
 ./pir_check.py
 ```
@@ -183,11 +206,13 @@ If it works, script should print `Motion detected!` and then close.
 ## Start capturing
 
 Run script to start video streaming, connect to the camera with `vlc` and point it:
+
 ```sh
 ./lv_stream.sh
 ```
 
 After aiming, run capturing with command (options are available):
+
 ```sh
 ./rwc_start.py
 
